@@ -32,8 +32,9 @@ function preload() {
 // ----------------------------------------------------------------
 //                          SETUP
 // ----------------------------------------------------------------
+
 function setup() {
-  createCanvas(800, 600);
+  createCanvas(windowWidth, windowHeight); // responsywność
   textAlign(CENTER, CENTER);
   textFont('sans-serif');
   noCursor();
@@ -55,17 +56,37 @@ function setup() {
   dalejImg.mask(maskG);
 }
 
-// ----------------------------------------------------------------
-//                          DRAW
-// ----------------------------------------------------------------
+function drawOptions() {
+  // Responsywne rozmiary i pozycje
+  const w = min(0.7 * width, 400);
+  const h = min(0.08 * height, 70);
+  const gap = min(0.03 * height, 30);
+  const totalHeight = zawody.length * h + (zawody.length - 1) * gap;
+  const startY = height / 2 - totalHeight / 2;
+
+  for (let i = 0; i < zawody.length; i++) {
+    const x = width / 2;
+    const y = startY + i * (h + gap);
+    stroke(borderCol); strokeWeight(2);
+    fill(i === selectedIndex ? fillCol : 'transparent');
+    rectMode(CENTER);
+    rect(x, y, w, h, h / 2);
+
+    noStroke();
+    fill('#000');
+    textSize(min(0.045 * width, 24));
+    text(zawody[i], x, y);
+  }
+}
+
 function draw() {
   // 1) tło
   image(tloZawod, 0, 0, width, height);
 
   // 2) nagłówek
   fill('#222'); noStroke();
-  textSize(32);
-  text('Kim chcesz zostać?', width/2, 60);
+  textSize(min(0.06 * width, 38));
+  text('Kim chcesz zostać?', width / 2, min(0.12 * height, 80));
 
   // 3) lista zawodów
   drawOptions();
@@ -73,23 +94,23 @@ function draw() {
   // 4) jeśli wybrano – najpierw tekst, potem przycisk
   if (selectedIndex !== -1) {
     const sel = zawody[selectedIndex];
-    const ok  = (sel === 'Żoną' || sel === 'Panią domu');
+    const ok = (sel === 'Żoną' || sel === 'Panią domu');
     fill(ok ? '#2e7d32' : '#d32f2f');
-    textSize(20);
+    textSize(min(0.045 * width, 22));
     const msg = ok
       ? 'Dobra dziewczynka 😇'
       : 'Dziewczynki nie nadają się do takiej pracy...';
 
     // pozycja tekstu
-    const textY   = height - TEXT_Y_OFFSET -40;
-    text(msg, width/2, textY);
+    const textY = height - TEXT_Y_OFFSET;
+    text(msg, width / 2, textY);
 
     // pozycja przycisku
-    const btnX    = width/2;
-    const btnY    = height - BUTTON_Y_OFFSET;
-    const btnR    = BTN_DIAMETER/2;
-    const over    = dist(mouseX, mouseY, btnX, btnY) < btnR;
-    const sizeXY  = over ? BTN_DIAMETER*HOVER_SCALE : BTN_DIAMETER;
+    const btnX = width / 2;
+    const btnY = height - BUTTON_Y_OFFSET;
+    const btnR = BTN_DIAMETER / 2;
+    const over = dist(mouseX, mouseY, btnX, btnY) < btnR;
+    const sizeXY = over ? BTN_DIAMETER * HOVER_SCALE : BTN_DIAMETER;
 
     imageMode(CENTER);
     image(dalejImg, btnX, btnY, sizeXY, sizeXY);
@@ -97,10 +118,10 @@ function draw() {
   }
 
   // 5) glitter
-  for (let i = glitterParticles.length-1; i>=0; i--) {
+  for (let i = glitterParticles.length - 1; i >= 0; i--) {
     glitterParticles[i].update();
     glitterParticles[i].show();
-    if (glitterParticles[i].finished()) glitterParticles.splice(i,1);
+    if (glitterParticles[i].finished()) glitterParticles.splice(i, 1);
   }
 
   // 6) kursor
@@ -109,96 +130,43 @@ function draw() {
   imageMode(CORNER);
 }
 
-// ----------------------------------------------------------------
-//                     DOGRYWANIE OPCJI
-// ----------------------------------------------------------------
-function drawOptions() {
-  const w=300, h=50, gap=15, startY=120;
-  for (let i=0; i<zawody.length; i++) {
-    const x = width/2, y = startY + i*(h+gap);
-    stroke(borderCol); strokeWeight(2);
-    fill(i===selectedIndex ? fillCol : 'transparent');
-    rectMode(CENTER);
-    rect(x, y, w, h, h/2);
-
-    noStroke();
-    fill('#000');
-    textSize(20);
-    text(zawody[i], x, y);
-  }
-}
-
-// ----------------------------------------------------------------
-//                     OBSŁUGA KLIKNIĘĆ
-// ----------------------------------------------------------------
 function mousePressed() {
   // dźwięk i glitter przy każdym kliknięciu
   if (clickSound.isLoaded()) clickSound.play();
-  for (let i=0; i<18; i++) {
+  for (let i = 0; i < 18; i++) {
     glitterParticles.push(new Glitter(mouseX, mouseY));
   }
 
+  // Responsywne rozmiary i pozycje
+  const w = min(0.7 * width, 400);
+  const h = min(0.08 * height, 70);
+  const gap = min(0.03 * height, 30);
+  const totalHeight = zawody.length * h + (zawody.length - 1) * gap;
+  const startY = height / 2 - totalHeight / 2;
+
   // wybór opcji
-  const w=300, h=50, gap=15, startY=120;
-  for (let i=0; i<zawody.length; i++) {
-    const x=width/2, y=startY+i*(h+gap);
+  for (let i = 0; i < zawody.length; i++) {
+    const x = width / 2, y = startY + i * (h + gap);
     if (
-      mouseX > x - w/2 && mouseX < x + w/2 &&
-      mouseY > y - h/2 && mouseY < y + h/2
+      mouseX > x - w / 2 && mouseX < x + w / 2 &&
+      mouseY > y - h / 2 && mouseY < y + h / 2
     ) {
-      selectedIndex = (selectedIndex===i ? -1 : i);
+      selectedIndex = (selectedIndex === i ? -1 : i);
       return;
     }
   }
 
-   // klik w DALEJ
+  // klik w DALEJ
   if (selectedIndex !== -1) {
-    const btnX = width/2;
+    const btnX = width / 2;
     const btnY = height - BUTTON_Y_OFFSET;
-    const btnR = BTN_DIAMETER/2;
+    const btnR = BTN_DIAMETER / 2;
     if (dist(mouseX, mouseY, btnX, btnY) < btnR) {
-      // Przeniesienie do scena5
       window.location.href = "https://mp123-dot.github.io/scena5/";
     }
   }
 }
 
-// ----------------------------------------------------------------
-//                        KLASA GLITTER
-// ----------------------------------------------------------------
-class Glitter {
-  constructor(x,y) {
-    this.x = x; this.y = y;
-    this.angle   = random(TWO_PI);
-    this.life    = 0;
-    this.maxLife = random(20,40);
-    this.size    = random(3,7);
-    this.color   = color(
-      random(180,255),
-      random(120,200),
-      random(200,255),
-      200
-    );
-  }
-  update() {
-    this.life++;
-    this.x += cos(this.angle)*1.5;
-    this.y += sin(this.angle)*1.5;
-  }
-  finished() {
-    return this.life > this.maxLife;
-  }
-  show() {
-    noStroke();
-    fill(this.color);
-    ellipse(this.x, this.y, this.size);
-  }
-}
-
-// ----------------------------------------------------------------
-//                     RESPONSYWNOŚĆ
-// ----------------------------------------------------------------
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  }
-
+}
