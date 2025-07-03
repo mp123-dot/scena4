@@ -56,6 +56,9 @@ function setup() {
   dalejImg.mask(maskG);
 }
 
+// ----------------------------------------------------------------
+//                     DOGRYWANIE OPCJI
+// ----------------------------------------------------------------
 function drawOptions() {
   // Responsywne rozmiary i pozycje
   const w = min(0.7 * width, 400);
@@ -79,6 +82,9 @@ function drawOptions() {
   }
 }
 
+// ----------------------------------------------------------------
+//                          DRAW
+// ----------------------------------------------------------------
 function draw() {
   // 1) tło
   image(tloZawod, 0, 0, width, height);
@@ -101,20 +107,22 @@ function draw() {
       ? 'Dobra dziewczynka 😇'
       : 'Dziewczynki nie nadają się do takiej pracy...';
 
-    // pozycja tekstu
-    const textY = height - TEXT_Y_OFFSET;
+    // KOMUNIKAT tuż nad przyciskiem DALEJ (np. 30px wyżej)
+    const btnY = height - BUTTON_Y_OFFSET;
+    const textY = btnY - BTN_DIAMETER / 2 - 50;
     text(msg, width / 2, textY);
 
     // pozycja przycisku
     const btnX = width / 2;
-    const btnY = height - BUTTON_Y_OFFSET;
     const btnR = BTN_DIAMETER / 2;
     const over = dist(mouseX, mouseY, btnX, btnY) < btnR;
     const sizeXY = over ? BTN_DIAMETER * HOVER_SCALE : BTN_DIAMETER;
 
-    imageMode(CENTER);
-    image(dalejImg, btnX, btnY, sizeXY, sizeXY);
-    imageMode(CORNER);
+    if (dalejImg) {
+      imageMode(CENTER);
+      image(dalejImg, btnX, btnY, sizeXY, sizeXY);
+      imageMode(CORNER);
+    }
   }
 
   // 5) glitter
@@ -125,11 +133,16 @@ function draw() {
   }
 
   // 6) kursor
-  imageMode(CENTER);
-  image(kwiatekImg, mouseX, mouseY, 32, 32);
-  imageMode(CORNER);
+  if (kwiatekImg) {
+    imageMode(CENTER);
+    image(kwiatekImg, mouseX, mouseY, 32, 32);
+    imageMode(CORNER);
+  }
 }
 
+// ----------------------------------------------------------------
+//                     OBSŁUGA KLIKNIĘĆ
+// ----------------------------------------------------------------
 function mousePressed() {
   // dźwięk i glitter przy każdym kliknięciu
   if (clickSound.isLoaded()) clickSound.play();
@@ -167,6 +180,41 @@ function mousePressed() {
   }
 }
 
+// ----------------------------------------------------------------
+//                        KLASA GLITTER
+// ----------------------------------------------------------------
+class Glitter {
+  constructor(x, y) {
+    this.x = x; this.y = y;
+    this.angle   = random(TWO_PI);
+    this.life    = 0;
+    this.maxLife = random(20, 40);
+    this.size    = random(3, 7);
+    this.color   = color(
+      random(180, 255),
+      random(120, 200),
+      random(200, 255),
+      200
+    );
+  }
+  update() {
+    this.life++;
+    this.x += cos(this.angle) * 1.5;
+    this.y += sin(this.angle) * 1.5;
+  }
+  finished() {
+    return this.life > this.maxLife;
+  }
+  show() {
+    noStroke();
+    fill(this.color);
+    ellipse(this.x, this.y, this.size);
+  }
+}
+
+// ----------------------------------------------------------------
+//                     RESPONSYWNOŚĆ
+// ----------------------------------------------------------------
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
